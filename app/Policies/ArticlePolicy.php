@@ -41,7 +41,7 @@ class ArticlePolicy
      */
     public function create(User $user)
     {
-        //
+        return !is_null($user);
     }
 
     /**
@@ -53,7 +53,7 @@ class ArticlePolicy
      */
     public function update(User $user, Article $article)
     {
-        //
+        return !is_null($user) && ($article->created_by === $user->id || $user->role_id === 1);
     }
 
     /**
@@ -65,7 +65,7 @@ class ArticlePolicy
      */
     public function delete(User $user, Article $article)
     {
-        //
+        return !is_null($user) && ($article->created_by === $user->id || $user->role_id === 1);
     }
 
     /**

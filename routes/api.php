@@ -25,8 +25,10 @@ Route::post('/login', [UserController::class, 'authenticate']);
 
 Route::post('/register', [UserController::class, 'store']);
 
-Route::apiResource('/categories', CategoryController::class);
-Route::apiResource('/articles', ArticleController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/categories', CategoryController::class);
+    Route::apiResource('/articles', ArticleController::class);
+});
 
 Route::get('/test', function () {
     return 'hello';

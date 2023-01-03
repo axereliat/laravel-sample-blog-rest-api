@@ -4,80 +4,48 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ArticleController extends Controller
 {
     public function index()
     {
-        $articles = Article::all();
+        $articles = Article::with('categories')->get();
 
-        return response()->json($articles);
+        return response()->json(ArticleResource::collection($articles));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreArticleRequest  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(StoreArticleRequest $request)
     {
-        //
+        $data = $request->validated();
+        $userId = Auth::id();
+        $data['created_by'] = $userId;
+        $data['updated_by'] = $userId;
+
+        $article = Article::create($data);
+        $article->categories()->sync($data['categories']);
+
+        return response()->json(ArticleResource::make($article), 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Article  $article
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Article $article)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Article  $article
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Article $article)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateArticleRequest  $request
-     * @param  \App\Models\Article  $article
-     * @return \Illuminate\Http\Response
-     */
     public function update(UpdateArticleRequest $request, Article $article)
     {
-        //
+        $data = $request->validated();
+        $userId = Auth::id();
+        $data['updated_by'] = $userId;
+
+        $article->update($data);
+
+        return response()->json(ArticleResource::make($article));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Article  $article
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Article $article)
     {
-        //
+        $article->delete();
+
+        return response()->json([], Response::HTTP_NO_CONTENT);
     }
 }
